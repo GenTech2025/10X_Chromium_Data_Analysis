@@ -1,0 +1,7 @@
+run_accession	study_accession	sample_accession	experiment_accession	tax_id	scientific_name	instrument_platform	library_name	library_strategy	library_selection	study_alias	fastq_ftp	sample_title
+SRR14244128	PRJNA722257	SAMN18747787	SRX10606759	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/028/SRR14244128/SRR14244128.fastq.gz	WT whole testis
+SRR14244129	PRJNA722257	SAMN18747787	SRX10606759	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/029/SRR14244129/SRR14244129.fastq.gz	WT whole testis
+SRR14244127	PRJNA722257	SAMN18747787	SRX10606759	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/027/SRR14244127/SRR14244127.fastq.gz	WT whole testis
+SRR14244130	PRJNA722257	SAMN18747787	SRX10606759	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/030/SRR14244130/SRR14244130.fastq.gz	WT whole testis
+SRR14244131	PRJNA722257	SAMN18747787	SRX10606759	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/031/SRR14244131/SRR14244131.fastq.gz	WT whole testis
+SRR14244132	PRJNA722257	SAMN18747786	SRX10606760	10090	Mus musculus	ILLUMINA		RNA-Seq	cDNA	GSE172157	ftp.sra.ebi.ac.uk/vol1/fastq/SRR142/032/SRR14244132/SRR14244132.fastq.gz	Zfp541-KO whole testis

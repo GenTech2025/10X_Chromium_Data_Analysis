@@ -1,0 +1,5 @@
+*.fastq
+*.fasta
+*.gz
+*.gtf
+*.tar
