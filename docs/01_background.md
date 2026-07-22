@@ -1,3 +1,6 @@
+
+> Issue with the last dataset was that the forward and reverse reads were merged together making them unsuitable for proper data pre-processing steps without decoupling them first
+```markdown
 # ZFP541 maintains the repression of pre-pachytene transcriptional programs and promotes male meiosis progression
 
 
@@ -16,6 +19,7 @@ Github Link: https://github.com/JarningGau/ZFP541_manuscript
 - Accession IDs: PRJNA722257, GSE172157
 - Raw Dataset Size: 41GB .gz files from ENA
 - Library Preparation Protocol: Chromium Single Cell 3' library and Gel Bead Kit v.3 (10XGenomics)
+```
 
-
+New Dataset (19th July 2026)
 

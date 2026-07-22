@@ -1,0 +1,3 @@
+Module	Section	Sample Name	Source
+FastQC	all_sections	SRR34640280_1	/home/roy/Desktop/portfolio_projects/10X_Chromium_Data_Analysis/results/fastqc_results/SRR34640280_1_fastqc.zip
+FastQC	all_sections	SRR34640280_2	/home/roy/Desktop/portfolio_projects/10X_Chromium_Data_Analysis/results/fastqc_results/SRR34640280_2_fastqc.zip
