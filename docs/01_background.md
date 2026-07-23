@@ -23,3 +23,5 @@ Github Link: https://github.com/JarningGau/ZFP541_manuscript
 
 New Dataset (19th July 2026)
 
+ENA Accession: PRJNA1294292
+Organism: Mus Musculus
