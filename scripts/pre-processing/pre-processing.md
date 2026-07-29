@@ -1,5 +1,7 @@
 # Different steps involved in pre-processing of 10X Chromium Single Cell RNA Seq Data
 
+> Note all the bash commands/scripts should be executed from the directory this file is in originally
+
 ### Quality Control
 
 ```bash
