@@ -2,19 +2,41 @@
 
 > Note all the bash commands/scripts should be executed from the directory this file is in originally
 
+### Download the dataset (PRJNA815362)
+
+```bash
+# Note this command should be executed in the data/ directory
+# Use aria2 for downloading the compressed fastq files
+aria2c \
+  -i fastq_urls.txt \
+  -x 2 \
+  -s 2 \
+  -j 4 \
+  -c \
+  --max-tries=10 \
+  --retry-wait=5
+
+```
+
 ### Quality Control
 
 ```bash
 # Run fastqc on the samples
 mkdir -p ../../results/fastqc_results
-fastqc -t 2 -o ../../results/fastqc_results/ ../../data/*.fastq.gz
+fastqc -t 4 -o ../../results/fastqc_results/ ../../data/*.fastq.gz
 
 # Run multiqc to summarize the fastqc results
 mkdir -p ../../results/multiqc_results
 multiqc -o ../../results/multiqc_results/ ../../results/fastqc_results/
 ```
 
-### Reference generation/download
+### Download pre-made kallisto index
+
+```bash
+
+```
+
+### Generate Kallisto index reference from scratch
 
 ```bash
 # create a directory to store the index
