@@ -33,7 +33,9 @@ multiqc -o ../../results/multiqc_results/ ../../results/fastqc_results/
 ### Download pre-made kallisto index
 
 ```bash
-
+# Standard index: (execute this command in the 'data/index' directory)
+kb ref -d human -i index.idx -g t2g.txt
+# Note the files used to generate the pre-made index is as follows: Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz, Homo_sapiens.GRCh38.108.gtf.gz
 ```
 
 ### Generate Kallisto index reference from scratch
@@ -51,7 +53,6 @@ wget -O ../../data/index/Mus_musculus.GRCm39.116.gtf.gz "http://ftp.ensembl.org/
 
 gunzip ../../data/index/*.gz
 ```
-### Create the reference index
 
 ```bash
 # create a kallisto index for mouse genome
@@ -70,21 +71,25 @@ kb ref \
 
 ### Pseudoalignment and Quantification using Kallisto
 
+> Upon reviewing the dataset TSV downloaded from the ENA website, I found that there is two 10X libraries in the dataset i.e. adipo 3d and undifferentiated and hence we need to run kb count command for the two libraries independently. (for more details check the 02_background.md file)
+
 ```bash
 # create a directory to store the quantified counts
 mkdir -p ../../data/processed-data
 
-# use kb count to pseudoalign and quantify the counts from fastq files
+# For Adipo 3d cells (SRR names were identified based on the dataset TSV)
 kb count \
-  --workflow=nucleus \
-  -t 8 \
-  -i ../../data/index/index.idx \
-  -g ../../data/index/t2g.txt \
-  -c1 ../../data/index/cdna_t2c.txt \
-  -c2 ../../data/index/intron_t2c.txt \
-  -x 10xv3 \
-  -o ../../data/counts/GSM9119989 \
-  ../../data/fastq/GSM9119989_R1.fastq.gz \
-  ../../data/fastq/GSM9119989_R2.fastq.gz
+    -i ../../data/index/index.idx \
+    -g ../../data/index/t2g.txt \
+    -x 10xv3 \
+    -o ../../dataprocessed-data/adipo_3d \
+    ../../data/SRR183065{60..75}_{1,2}.fastq.gz
 
+# For Undifferentiated cells
+kb count \
+    -i ../../data/index/index.idx \
+    -g ../../data/index/t2g.txt \
+    -x 10xv3 \
+    -o ../../data/processed-data/undifferentiated \
+    ../../data/SRR183065{76..91}_{1,2}.fastq.gz
 ```

@@ -4,3 +4,6 @@
 *.gz
 *.gtf
 *.tar
+*.idx
+data/processed-data/adipo_3d
+data/processed-data/undifferentiated
