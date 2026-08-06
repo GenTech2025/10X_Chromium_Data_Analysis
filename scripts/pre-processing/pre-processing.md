@@ -93,3 +93,21 @@ kb count \
     -o ../../data/processed-data/undifferentiated \
     ../../data/SRR183065{76..91}_{1,2}.fastq.gz
 ```
+
+#### Sanity Check the Output
+
+```bash
+# For adipo_3d
+wc -l processed-data/adipo_3d/counts_unfiltered/cells_x_genes.barcodes.txt
+wc -l processed-data/adipo_3d/counts_unfiltered/cells_x_genes.genes.txt
+head processed-data/adipo_3d/counts_unfiltered/cells_x_genes.mtx
+
+cat processed-data/adipo_3d/inspect.json
+
+# For undifferentiated cells
+wc -l processed-data/undifferentiated/counts_unfiltered/cells_x_genes.barcodes.txt
+wc -l processed-data/undifferentiated/counts_unfiltered/cells_x_genes.genes.txt
+head processed-data/undifferentiated/counts_unfiltered/cells_x_genes.mtx
+
+cat processed-data/undifferentiated/inspect.json
+```
