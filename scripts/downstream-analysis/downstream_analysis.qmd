@@ -1,0 +1,186 @@
+---
+title: "downstream_analysis"
+author: "Roy"
+format: html
+editor: visual
+---
+
+## Downstream Analysis
+
+### Setup the working directory
+
+```{r}
+#| label: setup
+#| include: false
+
+knitr::opts_knit$set(
+    root.dir = "/home/roy/Desktop/learning_projects/10X_Chromium_Data_Analysis"
+)
+      
+```
+
+### Install and load the necessary packages
+
+```{bash}
+# The command below is provided as an example for how to install r and biocoductor packages using mamba
+mamba install -c conda-forge -c bioconda r-tidyverse bioconductor-seurat
+```
+
+```{r message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(Matrix)
+library(SingleCellExperiment)
+library(DropletUtils)
+library(AcidPlots)
+```
+
+### Load the Data
+
+#### Adipo 3d
+
+```{r message=FALSE, warning=FALSE}
+
+# loading the gene expression matrix
+adipo_mat <- readMM(
+    "data/processed-data/adipo_3d/counts_unfiltered/cells_x_genes.mtx"
+)
+#dim(adipo_mat)
+#class(adipo_mat)
+
+# loading the barcode and gene information
+adipo_barcodes <- readLines(
+    "data/processed-data/adipo_3d/counts_unfiltered/cells_x_genes.barcodes.txt"
+)
+
+adipo_genes <- readLines(
+    "data/processed-data/adipo_3d/counts_unfiltered/cells_x_genes.genes.txt"
+)
+
+adipo_gene_names <- readLines(
+    "data/processed-data/adipo_3d/counts_unfiltered/cells_x_genes.genes.names.txt"
+)
+
+```
+
+Next we need to sanity check the data that is loaded into the environment.
+
+```{r}
+# Check the dimension and class of the gene expression matrix
+dim(adipo_mat)
+class(adipo_mat)
+
+# check the lengths of the vectors containing information on barcodes, gene ID and names
+length(adipo_barcodes)
+length(adipo_genes)
+length(adipo_gene_names)
+```
+
+The explanation of the output is given below:
+
+788,172 barcodes –\> 788,172 rows in the original matrix
+
+39,546 gene IDs –\> 39,546 columns in the original matrix
+
+39,546 gene names –\> one name for every gene ID
+
+```{r}
+# transpose the gene expression matrix so that it is compatible to be turned into a SingleCellExperiment object
+
+adipo_mat <- t(adipo_mat)
+
+dim(adipo_mat)
+```
+
+Now we need to annotate the gene expression matrix with gene IDs and cell bar codes
+
+```{r}
+rownames(adipo_mat) <- adipo_genes
+colnames(adipo_mat) <- adipo_barcodes
+
+# check the matrix
+adipo_mat[1:5, 1:5]
+```
+
+### Create the SingleCellExperiment object
+
+```{r}
+adipo_sce <- SingleCellExperiment(
+    assays = list(
+        counts = adipo_mat
+    )
+)
+
+# adding the experimental condition
+adipo_sce$condition <- "Adipo_3d"
+```
+
+kb count output —-\> Matrix Market file —-\> R sparse matrix —-\> SingleCellExperiment
+
+```{r}
+dim(adipo_mat)
+length(adipo_barcodes)
+length(adipo_genes)
+dim(adipo_sce)
+```
+
+#### Cell calling using DropletUtils
+
+```{r}
+adipo_ranks <- barcodeRanks(counts(adipo_sce))
+```
+
+```{r fig.height=6, fig.width=8}
+plot(
+    adipo_ranks$rank,
+    adipo_ranks$total,
+    log = "xy",
+    xlab = "Barcode rank",
+    ylab = "Total UMI count",
+    main = "Adipo 3d barcode rank"
+)
+
+o <- order(adipo_ranks$rank)
+
+lines(
+    adipo_ranks$rank[o],
+    adipo_ranks$fitted[o]
+)
+
+abline(
+    h = metadata(adipo_ranks)$knee,
+    lty = 2
+)
+
+abline(
+    h = metadata(adipo_ranks)$inflection,
+    lty = 2
+)
+```
+
+```{r}
+metadata(adipo_ranks)$knee
+metadata(adipo_ranks)$inflection
+```
+
+> ***Note to self: Need to better understand what exactly is happening in the bar code rank and how to properly interpret the plot and terminologies such as knee and inflection***
+
+```{r}
+# dropping droplets with ambient RNA (will take some time)
+
+adipo_emptydrops <- emptyDrops(
+    counts(adipo_sce)
+)
+```
+
+```{r}
+head(adipo_emptydrops)
+```
+
+```{r}
+table(adipo_emptydrops$Limited)
+```
+
+```{r}
+sum(adipo_emptydrops$FDR <= 0.01, na.rm = TRUE)
+```

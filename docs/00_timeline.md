@@ -22,3 +22,7 @@
 - Download pre-built kallisto index
 - Quantify the raw fastq files using kallisto-bustools (kb-python)
 - Clean the gene expression counts file so that its ready for downstream analysis
+
+#### 27th August 2026
+- Review project progress
+- Continue with downstream analysis
