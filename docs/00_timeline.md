@@ -25,4 +25,6 @@
 
 #### 27th August 2026
 - Review project progress
-- Continue with downstream analysis
+- Adipo 3d downstream processing complete
+
+#### 27th 
