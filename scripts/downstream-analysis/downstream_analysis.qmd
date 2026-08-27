@@ -23,7 +23,10 @@ knitr::opts_knit$set(
 
 ```{bash}
 # The command below is provided as an example for how to install r and biocoductor packages using mamba
-mamba install -c conda-forge -c bioconda r-tidyverse bioconductor-seurat
+
+# mamba install -c conda-forge -c bioconda r-tidyverse bioconductor-seurat
+
+# mamba install -c <channel-name> -c <second-channel-name> <repository>-<package>
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -33,6 +36,7 @@ library(Matrix)
 library(SingleCellExperiment)
 library(DropletUtils)
 library(AcidPlots)
+library(scuttle)
 ```
 
 ### Load the Data
@@ -45,8 +49,6 @@ library(AcidPlots)
 adipo_mat <- readMM(
     "data/processed-data/adipo_3d/counts_unfiltered/cells_x_genes.mtx"
 )
-#dim(adipo_mat)
-#class(adipo_mat)
 
 # loading the barcode and gene information
 adipo_barcodes <- readLines(
@@ -183,4 +185,263 @@ table(adipo_emptydrops$Limited)
 
 ```{r}
 sum(adipo_emptydrops$FDR <= 0.01, na.rm = TRUE)
+```
+
+> 8,884 barcodes have been statistically called as cell-containing droplets at FDR ≤ 1%.
+
+Downstream processing so far,
+
+```         
+              788,172 barcodes
+                     │
+                     ▼
+              barcode ranks
+                     │
+                     ▼
+        ┌────────────────────────┐
+        │ high-count population  │
+        │                        │
+        │   ↓                    │
+        │ likely cells           │
+        └────────────────────────┘
+                     │
+                emptyDrops()
+                     │
+                     ▼
+                8,884 calls
+                     │
+                     ▼
+            candidate cells
+```
+
+#### Check UMI distribution of the candidate cells
+
+```{r}
+adipo_called <- adipo_emptydrops$FDR <= 0.01
+
+summary(adipo_emptydrops$Total[adipo_called])
+```
+
+```         
+minimum called barcode = 101 UMIs
+median = 8174 UMIs
+maximum = 41425 UMIs
+```
+
+As we found earlier the knee was 8,168.916 UMIs and our **called cell population** has a median UMI of 8,174, which is a nice sanity check meaning the statistically called population is concentrated around the high-count region identified by the **barcode-rank analysis**.
+
+```{r}
+adipo_called <- !is.na(adipo_emptydrops$FDR) &
+                adipo_emptydrops$FDR <= 0.01
+
+sum(adipo_called)
+
+quantile(
+    adipo_emptydrops$Total[adipo_called],
+    probs = c(0, 0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99, 1)
+)
+```
+
+8,789 candidate non-empty/cell-containing droplets
+
+------------------------------------------------------------------------
+
+### Cell level quality control (OSCA used as reference)
+
+```{r}
+adipo_sce_called <- adipo_sce[, adipo_called]
+dim(adipo_sce_called)
+
+```
+
+```{r}
+adipo_qc <- perCellQCMetrics(
+    adipo_sce_called
+)
+```
+
+```{r}
+adipo_qc$sum
+adipo_qc$detected
+```
+
+sum = total UMI counts per cell
+
+detected = number of genes detected per cell
+
+```{r}
+colData(adipo_sce_called)$total_counts <- adipo_qc$sum
+colData(adipo_sce_called)$detected_genes <- adipo_qc$detected
+```
+
+```{r}
+head(colData(adipo_sce_called))
+```
+
+```{r fig.height=6, fig.width=8}
+hist(
+    adipo_sce_called$total_counts,
+    breaks = 100,
+    main = "Adipo 3d: total UMI counts per called cell",
+    xlab = "Total UMI counts"
+)
+```
+
+```{r fig.height=6, fig.width=8}
+hist(
+    adipo_sce_called$detected_genes,
+    breaks = 100,
+    main = "Adipo 3d: detected genes per called cell",
+    xlab = "Number of detected genes"
+)
+```
+
+```{r}
+summary(adipo_sce_called$total_counts)
+summary(adipo_sce_called$detected_genes)
+```
+
+#### Adding Mitochondria Gene Names and calculating MT gene percentage
+
+```{r}
+rowData(adipo_sce)$gene_name <- adipo_gene_names
+head(rowData(adipo_sce))
+```
+
+```{r}
+head(rowData(adipo_sce)$gene_name, 20)
+```
+
+```{r}
+sum(grepl("^MT-", rowData(adipo_sce)$gene_name))
+```
+
+```{r}
+is_mito <- grepl(
+    "^MT-",
+    rowData(adipo_sce)$gene_name
+)
+
+adipo_qc <- perCellQCMetrics(
+    adipo_sce_called,
+    subsets = list(
+        mito = is_mito
+    )
+)
+
+colData(adipo_sce_called)$mito_percent <- adipo_qc$subsets_mito_percent
+
+summary(adipo_sce_called$mito_percent)
+```
+
+```{r}
+hist(
+    adipo_sce_called$mito_percent,
+    breaks = 100,
+    main = "Adipo 3d: mitochondrial percentage",
+    xlab = "Mitochondrial counts (%)"
+)
+```
+
+```{r}
+plot(
+    adipo_sce_called$total_counts,
+    adipo_sce_called$mito_percent,
+    log = "x",
+    pch = 16,
+    cex = 0.5,
+    xlab = "Total UMI counts",
+    ylab = "Mitochondrial counts (%)",
+    main = "Adipo 3d: UMI counts vs mitochondrial percentage"
+)
+```
+
+#### Identifying QC outliers
+
+```{r}
+low_umi <- isOutlier(
+    adipo_sce_called$total_counts,
+    log = TRUE,
+    type = "lower",
+    nmads = 3
+)
+
+low_genes <- isOutlier(
+    adipo_sce_called$detected_genes,
+    log = TRUE,
+    type = "lower",
+    nmads = 3
+)
+
+
+high_mito <- isOutlier(
+    adipo_sce_called$mito_percent,
+    type = "higher",
+    nmads = 3
+)
+```
+
+```{r}
+table(low_umi)
+table(low_genes)
+table(high_mito)
+```
+
+```{r}
+# tells us how many cells would be flagged by at least one QC criterion
+table(low_umi | low_genes | high_mito)
+```
+
+```{r}
+table(
+    low_umi,
+    low_genes
+)
+```
+
+```{r}
+table(
+    low_umi,
+    high_mito
+)
+```
+
+```{r}
+table(
+    low_genes,
+    high_mito
+)
+```
+
+```{r}
+attr(low_umi, "thresholds")
+
+attr(low_genes, "thresholds")
+
+attr(high_mito, "thresholds")
+```
+
+Three groups of cell present in the dataset
+
+```         
+                     8,789 called droplets
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+          ▼                  ▼                  ▼
+     main population     low-RNA cells      high-mito cells
+       ~5,400             ~3,100              ~260
+```
+
+```{r}
+plot(
+    adipo_sce_called$total_counts,
+    adipo_sce_called$detected_genes,
+    log = "xy",
+    pch = 16,
+    cex = 0.5,
+    xlab = "Total UMI counts",
+    ylab = "Detected genes",
+    main = "Adipo 3d: UMI counts vs detected genes"
+)
 ```
