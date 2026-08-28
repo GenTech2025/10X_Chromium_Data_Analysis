@@ -25,6 +25,5 @@
 
 #### 27th August 2026
 - Review project progress
-- Adipo 3d downstream processing complete
-
-#### 27th 
+- Adipo 3d library cell calling complete
+- Cell level quality control of adipo 3d library started
