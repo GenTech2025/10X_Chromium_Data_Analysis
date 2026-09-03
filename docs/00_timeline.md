@@ -27,3 +27,8 @@
 - Review project progress
 - Adipo 3d library cell calling complete
 - Cell level quality control of adipo 3d library started
+- Troubleshoot github push issue due to .RData
+
+#### 3rd September 2026
+- Completed Adipo 3d library quality control
+- Started downstream processing of Undifferentiated library (completed till barcode ranks)
