@@ -132,7 +132,7 @@ colnames(undiff_mat) <- undiff_barcodes
 
 ```
 
----
+------------------------------------------------------------------------
 
 ## Create the SingleCellExperiment objects (Adipo 3d and Undifferentiated)
 
