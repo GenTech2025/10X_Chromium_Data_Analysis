@@ -32,3 +32,7 @@
 #### 3rd September 2026
 - Completed Adipo 3d library quality control
 - Started downstream processing of Undifferentiated library (completed till barcode ranks)
+
+#### 11th September 2026
+- Setup R and Quarto on VS Code
+- Completed downstream processing of Undifferentiated library
